@@ -7,7 +7,7 @@ var sourceDirectory = "c:\\Users\\mj\\Google Drive\\Logseq\\pages\\";
 var targetDirecotry = "c:\\Users\\mj\\Google Drive\\Obsidian\\Test\\Pages\\";
 
 var files = Directory.GetFiles(sourceDirectory, "*.md", SearchOption.AllDirectories);
-foreach (var file in files.Take(2))
+foreach (var file in files)
 {
     Console.WriteLine($"Converting {file}");
     var content = File.ReadAllLines(file);
@@ -34,6 +34,19 @@ foreach (var file in files.Take(2))
     }
 
     var newContent = content.Skip(index).ToArray();
+    for (int contentLineIndex = 0; contentLineIndex < newContent.Length; contentLineIndex++)
+    {
+        // line starts with '-' then strip it by removing two characters
+        if (newContent[contentLineIndex].Length > 1 && newContent[contentLineIndex][0] == '-')
+        {
+            newContent[contentLineIndex] = newContent[contentLineIndex].Substring(2);
+        }
+        else if (newContent[contentLineIndex].Length > 0)
+        {
+            // Strip first character - a tab
+            newContent[contentLineIndex] = newContent[contentLineIndex].Substring(1);
+        }
+    }
 
     // Dates are formated as [[2021-08-01]] in LogSeq - create a regex to match them
     var dateRegex = new Regex(@"\[\[(?<date>\d{4}-\d{2}-\d{2})\]\]");
@@ -53,7 +66,7 @@ foreach (var file in files.Take(2))
         {
             value = $"\"[[{linkMatch.Groups["link"].Value}]]\"";
         }
-        
+
         newTags.Add($"{tag.Item1.Replace(" ", "")}: {value}");
     }
     newTags.Add("---");
